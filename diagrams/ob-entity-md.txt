@@ -1,0 +1,145 @@
+erDiagram
+    %% Onboarding System %%
+    OnboardingApplication {
+        int ApplicationID PK
+        int PractitionerID FK  %% from Provider360
+        varchar Status
+        timestamp CreatedDate
+        timestamp ModifiedDate
+    }
+
+    PractitionerPersonalDetails {
+        int PersonalDetailsID PK
+        int ApplicationID FK
+        varchar FirstName
+        varchar LastName
+        varchar Email
+        varchar PhoneNumber
+        varchar AddressLine1
+        varchar AddressLine2
+        varchar City
+        varchar State
+        varchar ZipCode
+        varchar Country
+    }
+
+    PractitionerEducation {
+        int EducationID PK
+        int ApplicationID FK
+        varchar Degree
+        varchar Institution
+        int GraduationYear
+        varchar Specialization
+    }
+
+    PractitionerIdentifier {
+        int IdentifierID PK
+        int ApplicationID FK
+        varchar IdentifierType
+        varchar IdentifierValue
+    }
+
+    OnboardingCase {
+        int OnboardingCaseID PK
+        int ApplicationID FK
+        varchar Status
+        timestamp CreatedDate
+        timestamp ModifiedDate
+    }
+
+    %% Credentialing System %%
+    CredentialCase {
+        int CaseID PK
+        int ApplicationID FK
+        varchar Status
+        timestamp CreatedDate
+        timestamp ModifiedDate
+    }
+
+    CredentialHistory {
+        int HistoryID PK
+        int CaseID FK
+        varchar CredentialType
+        int CredentialID FK
+        varchar VerificationStatus
+        int VerifiedBy
+        timestamp VerificationDate
+        text VerificationNotes
+    }
+
+    CredentialEducation {
+        int CredentialEducationID PK
+        int CaseID FK
+        varchar Degree
+        varchar Institution
+        int GraduationYear
+        varchar Specialization
+        varchar VerificationStatus
+    }
+
+    CredentialIdentifier {
+        int CredentialIdentifierID PK
+        int CaseID FK
+        varchar IdentifierType
+        varchar IdentifierValue
+        varchar VerificationStatus
+    }
+
+    %% Provider360 System %%
+    Provider360Practitioner {
+        int PractitionerID PK
+        varchar PractitionerName
+        varchar Email
+        varchar PhoneNumber
+        varchar AddressLine1
+        varchar AddressLine2
+        varchar City
+        varchar State
+        varchar ZipCode
+        varchar Country
+        timestamp CreatedDate
+        timestamp ModifiedDate
+    }
+
+    Provider360Education {
+        int EducationID PK
+        int PractitionerID FK
+        varchar Degree
+        varchar Institution
+        int GraduationYear
+        varchar Specialization
+    }
+
+    %% Case Management System %%
+    CaseManagement {
+        int CaseID PK
+        int RelatedEntityID
+        varchar EntityType
+        varchar Status
+        timestamp CreatedDate
+        timestamp ModifiedDate
+    }
+
+    CaseHistory {
+        int HistoryID PK
+        int CaseID FK
+        varchar Action
+        int PerformedBy
+        timestamp ActionDate
+        text Notes
+    }
+
+    %% Relationships %%
+    OnboardingApplication ||--o{ PractitionerPersonalDetails: contains
+    OnboardingApplication ||--o{ PractitionerEducation: contains
+    OnboardingApplication ||--o{ PractitionerIdentifier: contains
+    OnboardingApplication ||--o{ OnboardingCase: contains
+
+    CredentialCase ||--o{ CredentialHistory: contains
+    CredentialCase ||--o{ CredentialEducation: contains
+    CredentialCase ||--o{ CredentialIdentifier: contains
+    CredentialCase ||--|| OnboardingApplication: references
+
+    Provider360Practitioner ||--o{ Provider360Education: contains
+
+    CaseManagement ||--o{ CaseHistory: contains
