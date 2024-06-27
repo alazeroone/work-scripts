@@ -1,0 +1,41 @@
+sequenceDiagram
+    participant Practitioner
+    participant OnboardingSystem
+    participant OnboardingOpsUser
+    participant CredentialingSystem
+
+    Practitioner->>OnboardingSystem: Start Application
+    OnboardingSystem-->>Practitioner: Display Application Form
+    Practitioner->>OnboardingSystem: Fill Out Details and Save as Draft
+    Practitioner->>OnboardingSystem: Submit Final Application
+
+    OnboardingSystem->>OnboardingOpsUser: Notify of Submitted Application
+    OnboardingOpsUser->>OnboardingSystem: Review Application
+    alt Application Complete
+        OnboardingOpsUser->>OnboardingSystem: Mark as Reviewed
+    else Application Incomplete
+        OnboardingOpsUser->>OnboardingSystem: Request Corrections
+        OnboardingSystem-->>Practitioner: Notify of Corrections Needed
+        Practitioner->>OnboardingSystem: Submit Corrected Details
+        OnboardingOpsUser->>OnboardingSystem: Review Corrected Application
+    end
+
+    OnboardingSystem->>OnboardingSystem: Create Credential Case
+    OnboardingSystem->>CredentialingSystem: Trigger Credentialing Event
+
+    CredentialingSystem->>CredentialingSystem: Validate Information
+    CredentialingSystem->>CredentialingSystem: Update Credential History
+    alt Credentials Valid
+        CredentialingSystem->>OnboardingSystem: Notify of Credential Approval
+        OnboardingSystem->>OnboardingSystem: Update Application Status to Approved
+        OnboardingSystem->>MainPractitionerDB: Sync Data
+        MainPractitionerDB-->>OnboardingSystem: Confirmation
+        OnboardingSystem-->>Practitioner: Notify of Enrollment
+    else Credentials Invalid
+        CredentialingSystem->>OnboardingSystem: Request Corrections
+        OnboardingSystem-->>Practitioner: Notify of Corrections Needed
+        Practitioner->>OnboardingSystem: Submit Corrected Details
+        OnboardingSystem->>OnboardingOpsUser: Notify of Corrected Submission
+        OnboardingOpsUser->>OnboardingSystem: Review Corrected Application
+        OnboardingSystem->>CredentialingSystem: Trigger Credentialing Event
+    end
