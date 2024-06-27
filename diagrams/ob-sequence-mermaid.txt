@@ -3,39 +3,44 @@ sequenceDiagram
     participant OnboardingSystem
     participant OnboardingOpsUser
     participant CredentialingSystem
+    participant MainPractitionerDB
 
-    Practitioner->>OnboardingSystem: Start Application
-    OnboardingSystem-->>Practitioner: Display Application Form
-    Practitioner->>OnboardingSystem: Fill Out Details and Save as Draft
-    Practitioner->>OnboardingSystem: Submit Final Application
+    %% Practitioner Submits Application %%
+    1. Practitioner->>OnboardingSystem: Start Application
+    2. OnboardingSystem-->>Practitioner: Display Application Form
+    3. Practitioner->>OnboardingSystem: Fill Out Details and Save as Draft
+    4. Practitioner->>OnboardingSystem: Submit Final Application
 
-    OnboardingSystem->>OnboardingOpsUser: Notify of Submitted Application
-    OnboardingOpsUser->>OnboardingSystem: Review Application
+    %% Onboarding Operations Reviews Application %%
+    5. OnboardingSystem->>OnboardingOpsUser: Notify of Submitted Application
+    6. OnboardingOpsUser->>OnboardingSystem: Review Application
     alt Application Complete
-        OnboardingOpsUser->>OnboardingSystem: Mark as Reviewed
+        7. OnboardingOpsUser->>OnboardingSystem: Mark as Reviewed
     else Application Incomplete
-        OnboardingOpsUser->>OnboardingSystem: Request Corrections
-        OnboardingSystem-->>Practitioner: Notify of Corrections Needed
-        Practitioner->>OnboardingSystem: Submit Corrected Details
-        OnboardingOpsUser->>OnboardingSystem: Review Corrected Application
+        8. OnboardingOpsUser->>OnboardingSystem: Request Corrections
+        9. OnboardingSystem-->>Practitioner: Notify of Corrections Needed
+        10. Practitioner->>OnboardingSystem: Submit Corrected Details
+        11. OnboardingOpsUser->>OnboardingSystem: Review Corrected Application
     end
 
-    OnboardingSystem->>OnboardingSystem: Create Credential Case
-    OnboardingSystem->>CredentialingSystem: Trigger Credentialing Event
+    %% Credential Case Creation and Event Trigger %%
+    12. OnboardingSystem->>OnboardingSystem: Create Credential Case
+    13. OnboardingSystem-->>CredentialingSystem: Trigger Credentialing Event
 
-    CredentialingSystem->>CredentialingSystem: Validate Information
-    CredentialingSystem->>CredentialingSystem: Update Credential History
+    %% Credentialing System Validates Information %%
+    14. CredentialingSystem->>CredentialingSystem: Validate Information
+    15. CredentialingSystem->>CredentialingSystem: Update Credential History
     alt Credentials Valid
-        CredentialingSystem->>OnboardingSystem: Notify of Credential Approval
-        OnboardingSystem->>OnboardingSystem: Update Application Status to Approved
-        OnboardingSystem->>MainPractitionerDB: Sync Data
-        MainPractitionerDB-->>OnboardingSystem: Confirmation
-        OnboardingSystem-->>Practitioner: Notify of Enrollment
+        16. CredentialingSystem-->>OnboardingSystem: Notify of Credential Approval
+        17. OnboardingSystem->>OnboardingSystem: Update Application Status to Approved
+        18. OnboardingSystem->>MainPractitionerDB: Sync Data
+        19. MainPractitionerDB-->>OnboardingSystem: Confirmation
+        20. OnboardingSystem-->>Practitioner: Notify of Enrollment
     else Credentials Invalid
-        CredentialingSystem->>OnboardingSystem: Request Corrections
-        OnboardingSystem-->>Practitioner: Notify of Corrections Needed
-        Practitioner->>OnboardingSystem: Submit Corrected Details
-        OnboardingSystem->>OnboardingOpsUser: Notify of Corrected Submission
-        OnboardingOpsUser->>OnboardingSystem: Review Corrected Application
-        OnboardingSystem->>CredentialingSystem: Trigger Credentialing Event
+        16. CredentialingSystem-->>OnboardingSystem: Request Corrections
+        17. OnboardingSystem-->>Practitioner: Notify of Corrections Needed
+        18. Practitioner->>OnboardingSystem: Submit Corrected Details
+        19. OnboardingSystem->>OnboardingOpsUser: Notify of Corrected Submission
+        20. OnboardingOpsUser->>OnboardingSystem: Review Corrected Application
+        21. OnboardingSystem-->>CredentialingSystem: Trigger Credentialing Event
     end
