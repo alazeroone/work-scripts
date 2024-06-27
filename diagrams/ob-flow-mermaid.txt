@@ -1,38 +1,34 @@
 flowchart TD
-    A1[Step 1: Practitioner Starts Application] --> A2[Step 2: Fill Out Personal Details]
-    A2 --> A3[Step 3: Fill Out Education Details]
-    A3 --> A4[Step 4: Fill Out Certification Details]
-    A4 --> A5[Step 5: Fill Out Insurance Details]
-    A5 --> A6[Step 6: Save as Draft]
-    A6 --> A7[Step 7: Submit Final Application]
+    subgraph Onboarding Module
+        A1[Step 1: Practitioner Starts Application] --> A2[Step 2: Fill Out Personal Details]
+        A2 --> A3[Step 3: Fill Out Education Details]
+        A3 --> A4[Step 4: Fill Out Certification Details]
+        A4 --> A5[Step 5: Fill Out Insurance Details]
+        A5 --> A6[Step 6: Save as Draft]
+        A6 --> A7[Step 7: Submit Final Application]
 
-    A7 --> B1[Step 8: Onboarding Operations Reviews Application]
-    B1 -->|Application Complete| B2[Step 9: Mark as Reviewed]
-    B1 -->|Application Incomplete| B3[Step 10: Request Corrections]
-    B3 --> A2
+        A7 --> B1[Step 8: Onboarding Operations Reviews Application]
+        B1 -->|Application Complete| B2[Step 9: Mark as Reviewed]
+        B1 -->|Application Incomplete| B3[Step 10: Request Corrections]
+        B3 --> A2
 
-    B2 --> C1[Step 11: Create Credential Case]
-    C1 --> C2[Step 12: Trigger Event to Credentialing System]
+        B2 --> C1[Step 11: Create Credential Case]
+        C1 --> C2[Step 12: Trigger Event to Credentialing System]
+    end
 
-    C2 --> D1[Step 13: Credentialing System Validates Information]
-    D1 --> D2[Step 14: Update Credential History]
-    D2 -->|Credentials Valid| E1[Step 15: Close Credential Case]
-    D2 -->|Credentials Invalid| D3[Step 16: Request Corrections]
-    D3 --> A2
+    subgraph Credentialing Module
+        C2 --> D1[Step 13: Credentialing System Receives Event]
+        D1 --> D2[Step 14: Validate Information]
+        D2 --> D3[Step 15: Update Credential History]
+        D2 -->|Credentials Valid| E1[Step 16: Close Credential Case]
+        D2 -->|Credentials Invalid| D4[Step 17: Request Corrections]
+        D4 --> F1[Step 18: Send Correction Request to Onboarding System]
+    end
 
-    E1 --> F1[Step 17: Update Onboarding Application Status to Approved]
-    F1 --> G1[Step 18: Sync Data to Main Practitioner Database]
-    G1 --> H1[Step 19: Practitioner Enrolled]
-    
-    A2 --> A3
-    A3 --> A4
-    A4 --> A5
-    A5 --> A6
-    A6 --> A7
-
-    B1 -->|Corrections Needed| B3
-    B3 --> A2
-
-    E1 --> F1
-    F1 --> G1
-    G1 --> H1
+    subgraph Onboarding Module
+        F1 --> B3
+        E1 --> G1[Step 19: Receive Credentialing Approval]
+        G1 --> H1[Step 20: Update Onboarding Application Status to Approved]
+        H1 --> I1[Step 21: Sync Data to Main Practitioner Database]
+        I1 --> J1[Step 22: Practitioner Enrolled]
+    end
