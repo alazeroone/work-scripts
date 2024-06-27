@@ -49,7 +49,7 @@ erDiagram
         date ExpiryDate
     }
 
-    ValidationCase {
+    CredentialCase {
         int CaseID PK
         int ApplicationID FK
         int PractitionerID FK
@@ -58,7 +58,7 @@ erDiagram
         timestamp ModifiedDate
     }
 
-    ValidationHistory {
+    CredentialHistory {
         int HistoryID PK
         int CaseID FK
         varchar CredentialType
@@ -190,13 +190,15 @@ erDiagram
     OnboardingApplication ||--o{ PractitionerEducation: contains
     OnboardingApplication ||--o{ PractitionerCertification: contains
     OnboardingApplication ||--o{ PractitionerInsurance: contains
-    OnboardingApplication ||--o{ ValidationCase: contains
+    OnboardingApplication ||--o{ CredentialCase: contains
 
-    ValidationCase ||--o{ ValidationHistory: contains
-    ValidationCase ||--|| tppractitioner: related_to
+    CredentialCase ||--o{ CredentialHistory: contains
+    CredentialCase ||--|| tppractitioner: related_to
 
     Notification ||--|| OnboardingApplication: related_to
     Notification ||--|| tppractitioner: related_to
+
+    OnboardingApplication ||--|| tppractitioner: creates
 
     tppractitioner ||--o{ tpcredentialcase: has
     tppractitioner ||--o{ tpaffiliation: has
