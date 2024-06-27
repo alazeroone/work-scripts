@@ -3,6 +3,7 @@ erDiagram
     OnboardingApplication {
         int ApplicationID PK
         int PractitionerID FK  %% from Provider360
+        int CaseID FK          %% from CaseManagement
         varchar Status
         timestamp CreatedDate
         timestamp ModifiedDate
@@ -37,14 +38,6 @@ erDiagram
         int ApplicationID FK
         varchar IdentifierType
         varchar IdentifierValue
-    }
-
-    OnboardingCase {
-        int OnboardingCaseID PK
-        int ApplicationID FK
-        varchar Status
-        timestamp CreatedDate
-        timestamp ModifiedDate
     }
 
     %% Credentialing System %%
@@ -133,7 +126,6 @@ erDiagram
     OnboardingApplication ||--o{ PractitionerPersonalDetails: contains
     OnboardingApplication ||--o{ PractitionerEducation: contains
     OnboardingApplication ||--o{ PractitionerIdentifier: contains
-    OnboardingApplication ||--o{ OnboardingCase: contains
 
     CredentialCase ||--o{ CredentialHistory: contains
     CredentialCase ||--o{ CredentialEducation: contains
@@ -143,3 +135,5 @@ erDiagram
     Provider360Practitioner ||--o{ Provider360Education: contains
 
     CaseManagement ||--o{ CaseHistory: contains
+    OnboardingApplication ||--|| CaseManagement: has
+    CredentialCase ||--|| CaseManagement: has
