@@ -1,7 +1,7 @@
 erDiagram
+    %% Onboarding System %%
     OnboardingApplication {
         int ApplicationID PK
-        int PractitionerID FK
         varchar Status
         timestamp CreatedDate
         timestamp ModifiedDate
@@ -31,28 +31,10 @@ erDiagram
         varchar Specialization
     }
 
-    PractitionerCertification {
-        int CertificationID PK
-        int ApplicationID FK
-        varchar CertificationName
-        varchar CertifyingBody
-        int CertificationYear
-        varchar CertificationNumber
-    }
-
-    PractitionerInsurance {
-        int InsuranceID PK
-        int ApplicationID FK
-        varchar InsuranceProvider
-        varchar PolicyNumber
-        text CoverageDetails
-        date ExpiryDate
-    }
-
+    %% Credentialing System %%
     CredentialCase {
         int CaseID PK
         int ApplicationID FK
-        int PractitionerID FK
         varchar Status
         timestamp CreatedDate
         timestamp ModifiedDate
@@ -69,44 +51,41 @@ erDiagram
         text VerificationNotes
     }
 
-    Notification {
-        int NotificationID PK
-        int PractitionerID FK
-        int ApplicationID FK
-        text Message
-        varchar Status
-        timestamp SentDate
-        timestamp AcknowledgedDate
+    CredentialEducation {
+        int CredentialEducationID PK
+        int CaseID FK
+        varchar Degree
+        varchar Institution
+        int GraduationYear
+        varchar Specialization
+        varchar VerificationStatus
     }
 
-    tppractitioner {
+    CredentialIdentifier {
+        int CredentialIdentifierID PK
+        int CaseID FK
+        varchar IdentifierType
+        varchar IdentifierValue
+        varchar VerificationStatus
+    }
+
+    %% Provider360 System %%
+    Provider360Practitioner {
         int PractitionerID PK
         varchar PractitionerName
-        varchar PractitionerType
-        varchar PractitionerStatus
+        varchar Email
+        varchar PhoneNumber
+        varchar AddressLine1
+        varchar AddressLine2
+        varchar City
+        varchar State
+        varchar ZipCode
+        varchar Country
         timestamp CreatedDate
         timestamp ModifiedDate
     }
 
-    tpcredentialcase {
-        int CredentialCaseID PK
-        int PractitionerID FK
-        varchar CredentialStatus
-        varchar VerificationNumber
-        timestamp CreatedDate
-        timestamp ModifiedDate
-    }
-
-    tpaffiliation {
-        int AffiliationID PK
-        int PractitionerID FK
-        varchar AffiliationType
-        varchar AffiliationStatus
-        timestamp CreatedDate
-        timestamp ModifiedDate
-    }
-
-    tppractitionereducation {
+    Provider360Education {
         int EducationID PK
         int PractitionerID FK
         varchar Degree
@@ -115,101 +94,13 @@ erDiagram
         varchar Specialization
     }
 
-    tppractitionerspecialty {
-        int SpecialtyID PK
-        int PractitionerID FK
-        varchar SpecialtyType
-        varchar SpecialtyBoard
-        varchar SpecialtyStatus
-        timestamp CreatedDate
-        timestamp ModifiedDate
-    }
-
-    tpersonheader {
-        int PersonID PK
-        varchar PersonName
-        date BirthDate
-        varchar Gender
-        varchar CitizenshipStatus
-        timestamp CreatedDate
-        timestamp ModifiedDate
-    }
-
-    tpersoncontacthead {
-        int ContactID PK
-        int PersonID FK
-        varchar ContactType
-        varchar ContactDetails
-        varchar PreferredContact
-    }
-
-    tlocationheader {
-        int LocationID PK
-        decimal Latitude
-        decimal Longitude
-        decimal Elevation
-    }
-
-    tppractitionerinsurance {
-        int InsuranceID PK
-        int PractitionerID FK
-        varchar InsuranceProvider
-        varchar PolicyNumber
-        text CoverageDetails
-        date ExpiryDate
-    }
-
-    tppractitionertraining {
-        int TrainingID PK
-        int PractitionerID FK
-        varchar TrainingType
-        varchar TrainingInstitution
-        int TrainingYear
-        varchar TrainingStatus
-    }
-
-    tppractitionerwork {
-        int WorkID PK
-        int PractitionerID FK
-        varchar WorkType
-        varchar WorkStatus
-        timestamp StartDate
-        timestamp EndDate
-    }
-
-    tppractitionercontractstatus {
-        int ContractStatusID PK
-        int PractitionerID FK
-        varchar ContractType
-        varchar ContractStatus
-        timestamp EffectiveDate
-        timestamp TerminationDate
-    }
-
+    %% Relationships %%
     OnboardingApplication ||--o{ PractitionerPersonalDetails: contains
     OnboardingApplication ||--o{ PractitionerEducation: contains
-    OnboardingApplication ||--o{ PractitionerCertification: contains
-    OnboardingApplication ||--o{ PractitionerInsurance: contains
-    OnboardingApplication ||--o{ CredentialCase: contains
 
     CredentialCase ||--o{ CredentialHistory: contains
-    CredentialCase ||--|| tppractitioner: related_to
+    CredentialCase ||--o{ CredentialEducation: contains
+    CredentialCase ||--o{ CredentialIdentifier: contains
+    CredentialCase ||--|| OnboardingApplication: references
 
-    Notification ||--|| OnboardingApplication: related_to
-    Notification ||--|| tppractitioner: related_to
-
-    OnboardingApplication ||--|| tppractitioner: creates
-
-    tppractitioner ||--o{ tpcredentialcase: has
-    tppractitioner ||--o{ tpaffiliation: has
-    tppractitioner ||--o{ tppractitionereducation: has
-    tppractitioner ||--o{ tppractitionerspecialty: has
-    tppractitioner ||--|| tpersonheader: is
-    tppractitioner ||--o{ tppractitionerinsurance: has
-    tppractitioner ||--o{ tppractitionertraining: has
-    tppractitioner ||--o{ tppractitionerwork: has
-    tppractitioner ||--o{ tppractitionercontractstatus: has
-
-    tpersonheader ||--o{ tpersoncontacthead: has
-
-    tpersoncontacthead ||--|| tlocationheader: located_at
+    Provider360Practitioner ||--o{ Provider360Education: contains
