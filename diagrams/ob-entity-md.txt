@@ -41,9 +41,10 @@ erDiagram
     }
 
     %% Credentialing System %%
-    CredentialCase {
-        int CaseID PK
+    CredentialingHeader {
+        int CredentialingID PK
         int ApplicationID FK
+        int CaseID FK          %% from CaseManagement
         varchar Status
         timestamp CreatedDate
         timestamp ModifiedDate
@@ -51,7 +52,7 @@ erDiagram
 
     CredentialHistory {
         int HistoryID PK
-        int CaseID FK
+        int CredentialingID FK
         varchar CredentialType
         int CredentialID FK
         varchar VerificationStatus
@@ -62,7 +63,7 @@ erDiagram
 
     CredentialEducation {
         int CredentialEducationID PK
-        int CaseID FK
+        int CredentialingID FK
         varchar Degree
         varchar Institution
         int GraduationYear
@@ -72,7 +73,7 @@ erDiagram
 
     CredentialIdentifier {
         int CredentialIdentifierID PK
-        int CaseID FK
+        int CredentialingID FK
         varchar IdentifierType
         varchar IdentifierValue
         varchar VerificationStatus
@@ -127,13 +128,13 @@ erDiagram
     OnboardingApplication ||--o{ PractitionerEducation: contains
     OnboardingApplication ||--o{ PractitionerIdentifier: contains
 
-    CredentialCase ||--o{ CredentialHistory: contains
-    CredentialCase ||--o{ CredentialEducation: contains
-    CredentialCase ||--o{ CredentialIdentifier: contains
-    CredentialCase ||--|| OnboardingApplication: references
+    CredentialingHeader ||--o{ CredentialHistory: contains
+    CredentialingHeader ||--o{ CredentialEducation: contains
+    CredentialingHeader ||--o{ CredentialIdentifier: contains
+    CredentialingHeader ||--|| OnboardingApplication: references
 
     Provider360Practitioner ||--o{ Provider360Education: contains
 
     CaseManagement ||--o{ CaseHistory: contains
     OnboardingApplication ||--|| CaseManagement: has
-    CredentialCase ||--|| CaseManagement: has
+    CredentialingHeader ||--|| CaseManagement: has
