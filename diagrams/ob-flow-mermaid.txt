@@ -1,0 +1,38 @@
+flowchart TD
+    A1[Practitioner Starts Application] --> A2[Fill Out Personal Details]
+    A2 --> A3[Fill Out Education Details]
+    A3 --> A4[Fill Out Certification Details]
+    A4 --> A5[Fill Out Insurance Details]
+    A5 --> A6[Save as Draft]
+    A6 --> A7[Submit Final Application]
+
+    A7 --> B1[Onboarding Operations Reviews Application]
+    B1 -->|Application Complete| B2[Mark as Reviewed]
+    B1 -->|Application Incomplete| B3[Request Corrections]
+    B3 --> A2
+
+    B2 --> C1[Create Credential Case]
+    C1 --> C2[Trigger Event to Credentialing System]
+
+    C2 --> D1[Credentialing System Validates Information]
+    D1 --> D2[Update Credential History]
+    D2 -->|Credentials Valid| E1[Close Credential Case]
+    D2 -->|Credentials Invalid| D3[Request Corrections]
+    D3 --> A2
+
+    E1 --> F1[Update Onboarding Application Status to Approved]
+    F1 --> G1[Sync Data to Main Practitioner Database]
+    G1 --> H1[Practitioner Enrolled]
+    
+    A2 --> A3
+    A3 --> A4
+    A4 --> A5
+    A5 --> A6
+    A6 --> A7
+
+    B1 -->|Corrections Needed| B3
+    B3 --> A2
+
+    E1 --> F1
+    F1 --> G1
+    G1 --> H1
