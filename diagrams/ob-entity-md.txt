@@ -2,8 +2,9 @@ erDiagram
     %% Onboarding System %%
     OnboardingApplication {
         int ApplicationID PK
-        int PractitionerID FK  %% from Provider360
-        int CaseID FK          %% from CaseManagement
+        int PractitionerID
+        int CaseID
+        int PIFId
         varchar Status
         timestamp CreatedDate
         timestamp ModifiedDate
@@ -44,31 +45,21 @@ erDiagram
     CredentialingHeader {
         int CredentialingID PK
         int ApplicationID FK
-        int CaseID FK          %% from CaseManagement
+        int CaseID
+        int PIFId
         varchar Status
         timestamp CreatedDate
         timestamp ModifiedDate
     }
 
-    CredentialHistory {
-        int HistoryID PK
-        int CredentialingID FK
-        varchar CredentialType
-        int CredentialID FK
-        varchar VerificationStatus
-        int VerifiedBy
-        timestamp VerificationDate
-        text VerificationNotes
-    }
-
     CredentialEducation {
         int CredentialEducationID PK
         int CredentialingID FK
+        int PractitionerEducationID FK
         varchar Degree
         varchar Institution
         int GraduationYear
         varchar Specialization
-        varchar VerificationStatus
     }
 
     CredentialIdentifier {
@@ -76,51 +67,38 @@ erDiagram
         int CredentialingID FK
         varchar IdentifierType
         varchar IdentifierValue
+    }
+
+    EducationVerification {
+        int EducationVerificationID PK
+        int CredentialEducationID FK
+        varchar FieldName
         varchar VerificationStatus
+        varchar VerifiedValue
+        varchar VerificationSource
+        text VerificationNotes
+        int VerifiedBy
+        timestamp VerificationDate
+        int Version
     }
 
-    %% Provider360 System %%
-    Provider360Practitioner {
-        int PractitionerID PK
-        varchar PractitionerName
-        varchar Email
-        varchar PhoneNumber
-        varchar AddressLine1
-        varchar AddressLine2
-        varchar City
-        varchar State
-        varchar ZipCode
-        varchar Country
-        timestamp CreatedDate
-        timestamp ModifiedDate
+    IdentifierVerification {
+        int IdentifierVerificationID PK
+        int CredentialIdentifierID FK
+        varchar VerificationStatus
+        varchar VerifiedIdentifierValue
+        varchar VerificationSource
+        text VerificationNotes
+        int VerifiedBy
+        timestamp VerificationDate
     }
 
-    Provider360Education {
-        int EducationID PK
-        int PractitionerID FK
-        varchar Degree
-        varchar Institution
-        int GraduationYear
-        varchar Specialization
-    }
-
-    %% Case Management System %%
-    CaseManagement {
-        int CaseID PK
-        int RelatedEntityID
-        varchar EntityType
-        varchar Status
-        timestamp CreatedDate
-        timestamp ModifiedDate
-    }
-
-    CaseHistory {
-        int HistoryID PK
-        int CaseID FK
-        varchar Action
-        int PerformedBy
-        timestamp ActionDate
-        text Notes
+    EducationFactVerification {
+        int EducationFactVerificationID PK
+        int CredentialEducationID FK
+        text FactVerificationNotes
+        int VerifiedBy
+        timestamp VerificationDate
     }
 
     %% Relationships %%
@@ -128,13 +106,11 @@ erDiagram
     OnboardingApplication ||--o{ PractitionerEducation: contains
     OnboardingApplication ||--o{ PractitionerIdentifier: contains
 
-    CredentialingHeader ||--o{ CredentialHistory: contains
     CredentialingHeader ||--o{ CredentialEducation: contains
     CredentialingHeader ||--o{ CredentialIdentifier: contains
     CredentialingHeader ||--|| OnboardingApplication: references
 
-    Provider360Practitioner ||--o{ Provider360Education: contains
-
-    CaseManagement ||--o{ CaseHistory: contains
-    OnboardingApplication ||--|| CaseManagement: has
-    CredentialingHeader ||--|| CaseManagement: has
+    CredentialEducation ||--|| PractitionerEducation: references
+    EducationVerification ||--|| CredentialEducation: references
+    EducationFactVerification ||--|| CredentialEducation: references
+    IdentifierVerification ||--|| CredentialIdentifier: references
