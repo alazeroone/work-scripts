@@ -1,0 +1,10 @@
+Scenario No.,Initial System(s) Taken,Transition to,Possible (Yes/No),Comments
+1,Only CRED,Only OB,Yes,Client can integrate OB system later.
+2,Only OB,Only CRED,Yes,Client can integrate CRED system later.
+3,Only CRED,CRED + OB,Yes,Client can add OB system later.
+4,Only OB,OB + CRED,Yes,Client can add CRED system later.
+5,CRED + OB,Only CRED,No,Removing OB might affect existing workflows and data consistency.
+6,CRED + OB,Only OB,No,Removing CRED might affect existing workflows and data consistency.
+7,None,CRED,Yes,Client can start with only CRED.
+8,None,OB,Yes,Client can start with only OB.
+9,None,CRED + OB,Yes,Client can start with both systems together.
