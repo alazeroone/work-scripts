@@ -1,0 +1,277 @@
+{
+  "PhysicianDetails": {
+    "LastName": "",
+    "FirstName": "",
+    "MiddleName": "",
+    "OtherNames": "",
+    "HomeMailingAddress": {
+      "Street": "",
+      "City": "",
+      "State": "",
+      "ZIP": ""
+    },
+    "HomeTelephoneNumber": "",
+    "HomeFaxNumber": "",
+    "Email": "",
+    "PagerNumber": "",
+    "BirthDate": "",
+    "BirthPlace": {
+      "City": "",
+      "State": "",
+      "Country": ""
+    },
+    "Citizenship": "",
+    "SocialSecurityNumber": "",
+    "Gender": "",
+    "Specialty": "",
+    "RaceEthnicity": "",
+    "Subspecialties": ""
+  },
+  "PracticeInformation": {
+    "PracticeName": "",
+    "DepartmentName": "",
+    "PrimaryOfficeStreetAddress": {
+      "Street": "",
+      "City": "",
+      "State": "",
+      "ZIP": ""
+    },
+    "PrimaryOfficeTelephoneNumber": "",
+    "PrimaryOfficeFaxNumber": "",
+    "OfficeManagerAdministrator": "",
+    "OfficeManagerTelephoneNumber": "",
+    "TaxIDNumber": "",
+    "SecondaryOfficeStreetAddress": {
+      "Street": "",
+      "City": "",
+      "State": "",
+      "ZIP": ""
+    },
+    "SecondaryOfficeTelephoneNumber": "",
+    "SecondaryOfficeFaxNumber": "",
+    "SecondaryOfficeManagerAdministrator": "",
+    "SecondaryTaxIDNumber": "",
+    "TertiaryOfficeStreetAddress": {
+      "Street": "",
+      "City": "",
+      "State": "",
+      "ZIP": ""
+    },
+    "TertiaryOfficeTelephoneNumber": "",
+    "TertiaryOfficeFaxNumber": "",
+    "TertiaryOfficeManagerAdministrator": "",
+    "TertiaryTaxIDNumber": "",
+    "OtherMedicalInterests": ""
+  },
+  "EducationInformation": {
+    "PremedicalEducation": {
+      "CollegeUniversityName": "",
+      "DegreeReceived": "",
+      "DateOfGraduation": "",
+      "MailingAddress": {
+        "Street": "",
+        "City": "",
+        "State": "",
+        "ZIP": ""
+      }
+    },
+    "MedicalProfessionalEducation": [
+      {
+        "MedicalSchool": "",
+        "DegreeReceived": "",
+        "DateOfGraduation": "",
+        "MailingAddress": {
+          "Street": "",
+          "City": "",
+          "StateCountry": "",
+          "ZIP": ""
+        }
+      },
+      {
+        "MedicalSchool": "",
+        "DegreeReceived": "",
+        "DateOfGraduation": "",
+        "MailingAddress": {
+          "Street": "",
+          "City": "",
+          "StateCountry": "",
+          "ZIP": ""
+        }
+      }
+    ]
+  },
+  "PostgraduateTraining": {
+    "Internships": [
+      {
+        "Institution": "",
+        "ProgramDirector": "",
+        "MailingAddress": {
+          "Street": "",
+          "City": "",
+          "StateCountry": "",
+          "ZIP": ""
+        },
+        "TypeOfInternship": "",
+        "Specialty": "",
+        "From": "",
+        "To": ""
+      }
+    ],
+    "ResidenciesFellowships": [
+      {
+        "Institution": "",
+        "ProgramDirector": "",
+        "MailingAddress": {
+          "Street": "",
+          "City": "",
+          "StateCountry": "",
+          "ZIP": ""
+        },
+        "TypeOfTraining": "",
+        "Specialty": "",
+        "From": "",
+        "To": "",
+        "DidYouComplete": ""
+      }
+    ]
+  },
+  "BoardCertification": [
+    {
+      "NameOfIssuingBoard": "",
+      "Specialty": "",
+      "DateCertifiedRecertified": "",
+      "ExpirationDate": "",
+      "AppliedForBoardCertification": "",
+      "IntentForCertification": ""
+    }
+  ],
+  "OtherCertifications": [
+    {
+      "Type": "",
+      "Number": "",
+      "ExpirationDate": ""
+    }
+  ],
+  "MedicalLicensureRegistrations": {
+    "CaliforniaStateMedicalLicenseNumber": "",
+    "IssueDate": "",
+    "ExpirationDate": "",
+    "DEARegistrationNumber": "",
+    "ExpirationDateDEA": "",
+    "ControlledSubstancesCertificate": "",
+    "ExpirationDateCDS": "",
+    "ECFMGNumber": "",
+    "ValidThrough": "",
+    "MedicareUPIN_NPI": "",
+    "MediCal_MedicaidNumber": "",
+    "OtherStateMedicalLicenses": [
+      {
+        "State": "",
+        "LicenseNumber": "",
+        "ExpirationDate": ""
+      }
+    ]
+  },
+  "ProfessionalLiability": {
+    "CurrentInsuranceCarrier": "",
+    "PolicyNumber": "",
+    "OriginalEffectiveDate": "",
+    "MailingAddress": {
+      "Street": "",
+      "City": "",
+      "State": "",
+      "ZIP": ""
+    },
+    "PerClaimAmount": "",
+    "AggregateAmount": "",
+    "ExpirationDate": "",
+    "PreviousInsuranceCarriers": [
+      {
+        "NameOfCarrier": "",
+        "PolicyNumber": "",
+        "From": "",
+        "To": "",
+        "MailingAddress": {
+          "Street": "",
+          "City": "",
+          "State": "",
+          "ZIP": ""
+        }
+      }
+    ]
+  },
+  "HospitalAffiliations": {
+    "CurrentAffiliations": [
+      {
+        "HospitalNameAndMailingAddress": {
+          "Street": "",
+          "City": "",
+          "State": "",
+          "ZIP": ""
+        },
+        "DepartmentStatus": "",
+        "AppointmentDate": ""
+      }
+    ],
+    "PreviousAffiliations": [
+      {
+        "HospitalNameAndMailingAddress": {
+          "Street": "",
+          "City": "",
+          "State": "",
+          "ZIP": ""
+        },
+        "From": "",
+        "To": "",
+        "ReasonForLeaving": ""
+      }
+    ]
+  },
+  "PeerReferences": [
+    {
+      "Name": "",
+      "Specialty": "",
+      "TelephoneNumber": "",
+      "MailingAddress": {
+        "Street": "",
+        "City": "",
+        "State": "",
+        "ZIP": ""
+      }
+    }
+  ],
+  "WorkHistory": [
+    {
+      "PracticeName": "",
+      "ContactName": "",
+      "TelephoneNumber": "",
+      "MailingAddress": {
+        "Street": "",
+        "City": "",
+        "State": "",
+        "ZIP": ""
+      },
+      "From": "",
+      "To": ""
+    }
+  ],
+  "AttestationQuestions": {
+    "LicenseStatus": "",
+    "MedicareMedicaidEligibility": "",
+    "ClinicalPrivilegesStatus": "",
+    "ResignationFromMedicalOrganizations": "",
+    "SurrenderOfEducationStatus": "",
+    "MembershipInProfessionalOrganizations": "",
+    "BoardCertificationStatus": "",
+    "CriminalConvictionStatus": "",
+    "IllegalDrugUse": "",
+    "ProfessionalLiabilityJudgments": "",
+    "ProfessionalLiabilityInsuranceStatus": "",
+    "AbilityToPerformProfessionalServices": ""
+  },
+  "InformationReleaseAcknowledgments": {
+    "PrintName": "",
+    "PhysicianSignature": "",
+    "Date": ""
+  }
+}
