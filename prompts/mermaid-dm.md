@@ -366,6 +366,195 @@ tplmcaseheader ||--o{ tonboarding: "tracks onboarding case"
   - `tVerificationConfig`: Specifies which attributes need verification.
   - `tcredentialingfact`: Links credentialing facts with provider information.
   - `tcredentialingfactverification`: Tracks the verification status of individual fact attributes.
+ 
+
+
+
+
+Here is the updated data model with the new `tproviderenrollment` table and changes to other tables such as `tperson`, `tpersondetail`, and `tpractioner`. I have integrated the updates you provided into the Enrollment domain.
+
+---
+
+### **Updated Enrollment Domain Schema**
+
+#### **1. Table: `tproviderenrollment`**
+Stores provider enrollment-related information.
+
+| Column                | Type           | Description                                               |
+|-----------------------|----------------|-----------------------------------------------------------|
+| `leveltypecode`        | VARCHAR(50)    | Code for the enrollment level type (e.g., Primary, Secondary). |
+| `leveldescription`     | VARCHAR(255)   | Description of the enrollment level.                      |
+| `leveldisplayname`     | VARCHAR(100)   | Display name for the enrollment level.                    |
+| `plmproviderlevelnameid` | INT (PK)     | Unique identifier for the provider enrollment level.       |
+
+#### **2. Table: `tperson`**
+Stores personal information about the provider, such as birth date and gender.
+
+| Column                | Type           | Description                                               |
+|-----------------------|----------------|-----------------------------------------------------------|
+| `personid`             | INT (PK)       | Unique identifier for the person.                         |
+| `dateofbirth`          | DATE           | Date of birth of the provider.                            |
+| `dateofdeath`          | DATE           | Date of death of the provider (if applicable).            |
+| `gendertypecode`       | VARCHAR(10)    | Code representing the gender of the provider (e.g., Male, Female). |
+
+#### **3. Table: `tpersondetail`**
+Stores additional details about the provider such as marital status, race, and citizenship.
+
+| Column                | Type           | Description                                               |
+|-----------------------|----------------|-----------------------------------------------------------|
+| `maritalstatustypecode`| VARCHAR(10)    | Code representing the marital status of the provider.      |
+| `raceethnicitytypecode`| VARCHAR(10)    | Code representing the race or ethnicity of the provider.   |
+| `citizenshipstatustypecode` | VARCHAR(10) | Code representing the citizenship status of the provider.  |
+| `handicapped`          | BIT            | Indicates if the provider is handicapped.                 |
+| `studentstatus`        | BIT            | Indicates if the provider is a student.                   |
+| `validfrom`            | DATE           | Start date of the provider's details validity.            |
+| `validto`              | DATE           | End date of the provider's details validity.              |
+
+#### **4. Table: `tpractioner`**
+Stores primary provider information, including personal identifiers and onboarding status.
+
+| Column                | Type           | Description                                               |
+|-----------------------|----------------|-----------------------------------------------------------|
+| `personid`             | INT (FK)       | Foreign key to `tperson` (Person ID).                     |
+| `providerEnrollmentId` | INT (FK)       | Foreign key to `tproviderenrollment` (Provider Enrollment ID). |
+| `practitionertypecode` | VARCHAR(50)    | Code representing the practitioner type (e.g., Doctor, Nurse). |
+| `practitionerid`       | INT (PK)       | Unique identifier for the practitioner.                   |
+| `npi`                  | VARCHAR(20)    | National Provider Identifier for the practitioner.        |
+| `fedid`                | VARCHAR(20)    | Federal identification number (if applicable).            |
+| `note`                 | TEXT           | Additional notes related to the practitioner.             |
+| `credentialstatustypecode` | VARCHAR(50) | Status code representing the credentialing status.         |
+| `practitionercontractstatustypecode` | VARCHAR(50) | Status code representing the contract status.              |
+| `practitioneronboardstatustypecode` | VARCHAR(50) | Status code representing the onboarding status.            |
+
+#### **5. Table: `tplmpractitioneridentifier`**
+Stores additional identifiers for the practitioner (e.g., TIN, licenses).
+
+| Column                | Type           | Description                                               |
+|-----------------------|----------------|-----------------------------------------------------------|
+| `practitionerid`       | INT (FK)       | Foreign key to `tpractioner` (Practitioner ID).           |
+| `provideridentifierid` | INT (PK)       | Unique identifier for the provider identifier.            |
+| `provideridentifier`   | VARCHAR(50)    | Identifier value (e.g., TIN, License Number).             |
+| `effectivefrom`        | DATE           | Date from which the identifier is effective.              |
+| `terminatedon`         | DATE           | Date the identifier was terminated (if applicable).       |
+| `identifierdescription` | TEXT          | Description of the identifier.                            |
+| `termreason`           | VARCHAR(255)   | Reason for termination of the identifier (if applicable). |
+| `registrationstatustypecode` | VARCHAR(50) | Registration status type for the identifier.               |
+| `issuingauthority`     | VARCHAR(50)    | The authority that issued the identifier.                 |
+| `scheduledtypecode`    | VARCHAR(50)    | Scheduled type code for the identifier (e.g., Regular, Temporary). |
+| `incurrentstate`       | BIT            | Indicates if the identifier is current or active.         |
+| `licensetypecode`      | VARCHAR(50)    | Code representing the type of license (if applicable).    |
+| `identifierstatustypecode` | VARCHAR(50) | Status code representing the identifier’s current status.  |
+
+#### **6. Table: `tpractionereducation`**
+Stores education history for the practitioner.
+
+| Column                | Type           | Description                                               |
+|-----------------------|----------------|-----------------------------------------------------------|
+| `practitionerid`       | INT (FK)       | Foreign key to `tpractioner` (Practitioner ID).           |
+| `statecode`            | VARCHAR(10)    | Code representing the state where the degree was obtained.|
+| `isspecialtyboardqualification` | BIT | Indicates if the degree is a specialty board qualification. |
+| `specialtytypecode`    | VARCHAR(50)    | Code representing the type of specialty.                  |
+| `recertificationeligibility` | BIT     | Indicates if the provider is eligible for recertification.|
+| `country`              | VARCHAR(50)    | Country where the degree was obtained.                    |
+| `certificatename`      | VARCHAR(100)   | Name of the certificate obtained.                         |
+| `certificateissuedate` | DATE           | Date the certificate was issued.                          |
+| `certificateexpirydate` | DATE          | Date the certificate expires.                             |
+
+#### **7. Table: `tpractionerworkexperience`**
+Stores work experience for the practitioner.
+
+| Column                | Type           | Description                                               |
+|-----------------------|----------------|-----------------------------------------------------------|
+| `organizationname`     | VARCHAR(100)   | Name of the organization where the practitioner worked.    |
+| `designation`          | VARCHAR(100)   | Role or designation at the organization.                  |
+| `city`                 | VARCHAR(100)   | City where the organization is located.                   |
+
+---
+
+### **Updated ER Diagram with Mermaid Syntax**
+
+```mermaid
+erDiagram
+
+%% Enrollment Domain
+tproviderenrollment {
+    varchar leveltypecode
+    varchar leveldescription
+    varchar leveldisplayname
+    int plmproviderlevelnameid PK
+}
+tperson {
+    int personid PK
+    date dateofbirth
+    date dateofdeath
+    varchar gendertypecode
+}
+tpersondetail {
+    varchar maritalstatustypecode
+    varchar raceethnicitytypecode
+    varchar citizenshipstatustypecode
+    bit handicapped
+    bit studentstatus
+    date validfrom
+    date validto
+}
+tpractioner {
+    int practitionerid PK
+    int personid FK "Foreign key to tperson"
+    int providerEnrollmentId FK "Foreign key to tproviderenrollment"
+    varchar practitionertypecode
+    varchar npi
+    varchar fedid
+    text note
+    varchar credentialstatustypecode
+    varchar practitionercontractstatustypecode
+    varchar practitioneronboardstatustypecode
+}
+tplmpractitioneridentifier {
+    int provideridentifierid PK
+    int practitionerid FK "Foreign key to tpractioner"
+    varchar provideridentifier
+    date effectivefrom
+    date terminatedon
+    text identifierdescription
+    varchar termreason
+    varchar registrationstatustypecode
+    varchar issuingauthority
+    varchar scheduledtypecode
+    bit incurrentstate
+    varchar licensetypecode
+    varchar identifierstatustypecode
+}
+tpractionereducation {
+    int practitionerid FK "Foreign key to tpractioner"
+    varchar statecode
+    bit isspecialtyboardqualification
+    varchar specialtytypecode
+    bit recertificationeligibility
+    varchar country
+    varchar certificatename
+    date certificateissuedate
+    date certificateexpirydate
+}
+tpractionerworkexperience {
+    varchar organizationname
+    varchar designation
+    varchar city
+}
+
+%% Relationships
+tpractioner ||--o{ tproviderenrollment : "enrolled in"
+tpractioner ||--o{ tplmpractitioneridentifier : "has identifiers"
+tpractioner ||--o{ tpractionereducation : "has education"
+tpractioner ||--o{ tpractionerworkexperience : "has work experience"
+tpractioner ||--o{ tperson : "belongs to person"
+```
+
+---
+
+This updated data model reflects the new **Enrollment Domain** structure, including the **provider enrollment table (`tprovideren
+
+rollment`)** and other adjustments to the schema for handling provider-specific details such as education, work experience, and identifiers.
   
 - **Case Management Domain**:
   - `tplmcaseheader`: Tracks onboarding and credentialing cases. It's linked to `tonboarding`.
