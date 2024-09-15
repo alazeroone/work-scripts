@@ -191,3 +191,210 @@ ADD ProviderFactReferenceID INT NOT NULL,
 - **Implement event-driven mechanisms** (e.g., using a message broker like Kafka or RabbitMQ) to notify the Credentialing domain of changes in fact definitions or mandatory attributes in Enrollment. This ensures that Credentialing is always up-to-date without requiring synchronous calls.
 
 ###
+
+
+Great! In a **synchronous approach**, you can ensure transactional consistency by including the API calls to both the **Enrollment** and **Onboarding BFF APIs** as part of the same workflow. By executing these actions within the same transaction, you avoid integrity issues (such as saving data in Enrollment but failing to create an onboarding application).
+
+Here’s a detailed explanation of how we can design this **synchronous transaction** approach for managing onboarding status.
+
+---
+
+### **1. Synchronous Flow for Managing Onboarding Status**
+
+In this design, the **Enrollment service** will handle both the saving of provider information and the creation of the onboarding application in a single workflow by directly calling the **Onboarding BFF APIs**. Both operations will be part of the same transaction, ensuring that if one fails, the entire operation rolls back, preventing data inconsistencies.
+
+---
+
+### **2. Step-by-Step Process for Updating Onboarding Status**
+
+#### **Step 1: Save Provider Information (Personal Information) in Enrollment Database**
+
+- **Action**: The provider fills out a **personal information card** on the UI. When they click "Save," the UI sends the data to the **BFF API**.
+- **Process**:
+  1. The **BFF API** calls the **Enrollment microservice** to save the provider's personal information.
+  2. The **Enrollment microservice** inserts the personal information into the `tpractioner` table.
+  3. Once the provider information is saved successfully, the Enrollment microservice proceeds to the next step to create an onboarding application.
+  
+  **Database Insertion** (in **Enrollment DB**):
+
+  ```sql
+  INSERT INTO tpractioner (personid, practitionername, contactinfo, ...) 
+  VALUES (...);
+  ```
+
+#### **Step 2: Create Onboarding Application in Onboarding Database**
+
+- **Action**: After saving provider information, the Enrollment service synchronously calls the **Onboarding BFF API** to create the onboarding application.
+- **Process**:
+  1. The **Enrollment service** sends a request to the **Onboarding BFF API** to create an onboarding application with the `ProviderID` received from Step 1.
+  2. The **Onboarding service** creates a new record in the `tonboarding` table in the **Onboarding Database** and assigns the application an initial status of `Draft` or `In Progress`.
+  3. The Onboarding service returns the `ApplicationID` to the Enrollment service.
+  
+  **Database Insertion** (in **Onboarding DB**):
+
+  ```sql
+  INSERT INTO tonboarding (applicationtype, providerid, status, createdon, ...) 
+  VALUES (...);
+  ```
+
+#### **Step 3: Ensure Transactional Consistency**
+
+- **Transaction**: Both saving provider data in **Enrollment** and creating the onboarding application in **Onboarding** are part of a single **distributed transaction**.
+- **Commit or Rollback**: If either the Enrollment or Onboarding service fails at any point, the entire transaction is rolled back to avoid inconsistent data.
+  
+  - If the **Onboarding application creation** fails, the provider’s personal information saved in the Enrollment database will be rolled back.
+  - If the **Enrollment save operation** fails, the onboarding application will not be created.
+
+  **Example using a transaction management library** (pseudo code):
+
+  ```java
+  @Transactional
+  public void saveProviderAndCreateOnboarding(ProviderData providerData) {
+      try {
+          // Save provider data in Enrollment DB
+          Long providerId = enrollmentService.saveProviderData(providerData);
+
+          // Call Onboarding BFF API to create an onboarding application
+          OnboardingApplicationResponse response = onboardingBFFApi.createOnboardingApplication(providerId);
+          
+          // Onboarding and Enrollment both successful, commit the transaction
+      } catch (Exception e) {
+          // If any error occurs, rollback the transaction
+          throw new TransactionalException("Transaction failed. Rolling back...", e);
+      }
+  }
+  ```
+
+#### **Step 4: Updating the Status**
+
+The status of the onboarding application will be updated based on the progress of the provider's information being filled out. The status will be managed centrally in the **Onboarding database** via synchronous updates from the Enrollment service.
+
+- **Scenario**: As the provider fills out more sections (cards), the status of the onboarding application is progressively updated.
+- **Example**:
+  - **First card saved (personal info)**: The status is set to `In Progress`.
+  - **All sections completed and submitted**: The status is updated to `Submitted`.
+  - **After admin approval**: The status is updated to `Approved`.
+
+---
+
+### **3. High-Level Sequence of Operations**
+
+1. **UI sends personal information** to the BFF API.
+2. **BFF API calls the Enrollment service** to save provider information.
+3. After the personal information is successfully saved, the **Enrollment service calls the Onboarding BFF API** to create an onboarding application.
+4. **Onboarding BFF API creates the application**, assigns the `ApplicationID`, and returns it to the Enrollment service.
+5. **Both actions succeed**, and the entire transaction is committed.
+
+---
+
+### **4. Sequence Diagram for Synchronous Status Updates**
+
+```mermaid
+sequenceDiagram
+    participant UI
+    participant BFF
+    participant EnrollmentService
+    participant OnboardingService
+    participant EnrollmentDB
+    participant OnboardingDB
+
+    %% Step 1: Saving personal info
+    UI->>BFF: Save personal info (PersonalInfo Card)
+    BFF->>EnrollmentService: Save personal info
+    EnrollmentService->>EnrollmentDB: Insert into tpractioner
+    EnrollmentDB-->>EnrollmentService: Success (ProviderID)
+
+    %% Step 2: Creating onboarding application
+    EnrollmentService->>OnboardingService: Create onboarding application (ProviderID)
+    OnboardingService->>OnboardingDB: Insert into tonboarding (ProviderID, status)
+    OnboardingDB-->>OnboardingService: Success (ApplicationID)
+    OnboardingService-->>EnrollmentService: Success (ApplicationID)
+
+    %% Step 3: Committing transaction
+    EnrollmentService-->>BFF: Success (ProviderID, ApplicationID)
+    BFF-->>UI: Success (ProviderID, ApplicationID)
+```
+
+---
+
+### **5. Handling Status Updates for Future Cards (Education, Work Experience)**
+
+As the provider fills out more sections (cards) of the onboarding form, the **Enrollment service** will continue updating the **Onboarding service** synchronously.
+
+#### **Steps for Each Card Save**
+
+1. **UI saves education info** (or other sections).
+2. The **BFF API** calls the **Enrollment service** to save this information.
+3. The **Enrollment service** saves the data and synchronously updates the **Onboarding service** by calling its API to reflect the status change (e.g., `In Progress`).
+4. The **Onboarding service** updates the `tonboarding` table in the **Onboarding DB** with the latest status.
+
+#### **Status Updates for Each Stage**
+
+- **Draft**: Initial status when the provider starts the application.
+- **In Progress**: After the provider saves at least one section (e.g., personal info).
+- **Submitted**: Once the provider has completed and submitted all sections.
+- **Approved**: Once the admin approves the application.
+
+---
+
+### **6. Transaction Management and Integrity**
+
+To maintain integrity across the different operations, we will ensure that all operations (both **Enrollment** and **Onboarding**) are part of the same **transactional context**.
+
+#### **Key Considerations for Transactional Management:**
+
+1. **Distributed Transaction Support**:
+   - Use a transaction manager to handle distributed transactions that span multiple services.
+   - Ensure that either both the **Enrollment save operation** and **Onboarding application creation** succeed, or both fail and roll back.
+
+2. **Timeouts and Failures**:
+   - Implement timeouts for calls to the Onboarding BFF API to prevent long waits in case of failures.
+   - Use circuit breaker patterns to handle temporary unavailability of the Onboarding service.
+
+---
+
+### **7. Status Management and Database Schema Adjustments**
+
+#### **Onboarding DB (`tonboarding` table)**
+
+We will store the onboarding status in the **Onboarding database**, allowing the Enrollment service to update the status when necessary.
+
+**Schema for `tonboarding`:**
+
+```sql
+CREATE TABLE tonboarding (
+    applicationid INT PRIMARY KEY,
+    providerid INT,  -- FK to tpractioner in Enrollment DB
+    applicationtype VARCHAR(50),
+    status VARCHAR(20),  -- Draft, In Progress, Submitted, Approved
+    createdon DATETIME,
+    updatedon DATETIME,
+    FOREIGN KEY (providerid) REFERENCES Enrollment.tpractioner(practitionerid)
+);
+```
+
+- **Status Field**: This field will be updated by synchronous calls from the Enrollment service based on the progress of the provider’s form completion.
+
+---
+
+### **8. Error Handling and Rollback**
+
+To ensure consistency and reliability, implement robust error-handling mechanisms:
+
+1. **If the Onboarding service fails**: Roll back the provider data insertion in the Enrollment database.
+2. **If the Enrollment service fails**: No call should be made to the Onboarding service, and no onboarding application should be created.
+3. **Implement retries**: In case of transient failures, retries should be managed by the Enrollment service to ensure that the onboarding application is eventually created if it initially fails.
+
+---
+
+### **9. Benefits of Synchronous Transactional Approach**
+
+1. **Data Consistency**: Ensures that both the **Enrollment DB** and **Onboarding DB** are updated together, preventing partial failures.
+2. **Simplicity**: Easier to implement compared to an asynchronous event-driven approach, as it doesn’t require message queues or event handling.
+3. **Immediate Feedback**: The UI gets immediate confirmation that the provider information has been saved and the onboarding application has been created.
+
+---
+
+### **Conclusion**
+
+By using a synchronous, transaction-based approach, we ensure that provider information and onboarding applications are created together as part of a single transaction. This guarantees consistency and avoids potential integrity issues. The **Enrollment service** will handle both data-saving operations and status updates by calling the **Onboarding BFF API** and committing the changes only when both operations are successful.
