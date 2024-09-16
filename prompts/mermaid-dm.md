@@ -560,3 +560,529 @@ rollment`)** and other adjustments to the schema for handling provider-specific 
   - `tplmcaseheader`: Tracks onboarding and credentialing cases. It's linked to `tonboarding`.
 
 This structure covers the data model across the **Onboarding**, **Enrollment**, **Credentialing**, and **Case Management** domains.
+
+Certainly! Below is the **updated ER diagram** for the entire data model, including all domains: **Onboarding**, **Enrollment**, **Credentialing**, and **Case Management**. I've rechecked the diagram to ensure all tables and relationships are included. Following the diagram, I've provided detailed descriptions for each table, including their columns, data types, descriptions, and example data.
+
+---
+
+## **Combined ER Diagram**
+
+```mermaid
+erDiagram
+
+%% Onboarding Domain
+tonboarding {
+    int applicationid PK
+    int providerid FK "FK to tpractioner.practitionerid"
+    varchar applicationtype
+    varchar status
+    datetime createdon
+    datetime updatedon
+}
+troster {
+    int rosterid PK
+    int applicationid FK "FK to tonboarding.applicationid"
+    json rosterdata
+    datetime createdon
+}
+tonboardingcaseheader {
+    int caseid PK
+    int applicationid FK "FK to tonboarding.applicationid"
+    varchar casestatus
+    varchar priority
+    datetime duedate
+    datetime createdon
+    datetime updatedon
+}
+
+%% Enrollment Domain
+tperson {
+    int personid PK
+    date dateofbirth
+    date dateofdeath
+    varchar gendertypecode
+}
+tpersondetail {
+    int personid FK "FK to tperson.personid"
+    varchar maritalstatustypecode
+    varchar raceethnicitytypecode
+    varchar citizenshipstatustypecode
+    bit handicapped
+    bit studentstatus
+    date validfrom
+    date validto
+}
+tproviderenrollment {
+    int plmproviderlevelnameid PK
+    varchar leveltypecode
+    varchar leveldescription
+    varchar leveldisplayname
+}
+tpractioner {
+    int practitionerid PK
+    int personid FK "FK to tperson.personid"
+    int providerEnrollmentId FK "FK to tproviderenrollment.plmproviderlevelnameid"
+    varchar practitionertypecode
+    varchar npi
+    varchar fedid
+    text note
+    varchar credentialstatustypecode
+    varchar practitionercontractstatustypecode
+    varchar practitioneronboardstatustypecode
+}
+tplmpractitioneridentifier {
+    int provideridentifierid PK
+    int practitionerid FK "FK to tpractioner.practitionerid"
+    varchar provideridentifier
+    date effectivefrom
+    date terminatedon
+    text identifierdescription
+    varchar termreason
+    varchar registrationstatustypecode
+    varchar issuingauthority
+    varchar scheduledtypecode
+    bit incurrentstate
+    varchar licensetypecode
+    varchar identifierstatustypecode
+}
+tpractionereducation {
+    int educationid PK
+    int practitionerid FK "FK to tpractioner.practitionerid"
+    varchar statecode
+    bit isspecialtyboardqualification
+    varchar specialtytypecode
+    bit recertificationeligibility
+    varchar country
+    varchar certificatename
+    date certificateissuedate
+    date certificateexpirydate
+}
+tpractionerworkexperience {
+    int experienceid PK
+    int practitionerid FK "FK to tpractioner.practitionerid"
+    varchar organizationname
+    varchar designation
+    varchar city
+    date startdate
+    date enddate
+}
+tFactTypeReference {
+    varchar facttypecode PK
+    varchar facttypename
+    text description
+    varchar status
+    datetime createdon
+}
+tProviderFactReference {
+    int providerfactreferenceid PK
+    int providerid FK "FK to tpractioner.practitionerid"
+    varchar facttypecode FK "FK to tFactTypeReference.facttypecode"
+    varchar facttablename
+    int factrecordid
+    varchar status
+    datetime createdon
+}
+tFactAttributeReference {
+    varchar facttypecode FK "FK to tFactTypeReference.facttypecode"
+    varchar fieldname
+    bit ismandatory
+    datetime createdon
+
+}
+
+%% Credentialing Domain
+tcredentialing {
+    int credentialingid PK
+    int providerid FK "FK to tpractioner.practitionerid"
+    varchar credentialingtype
+    varchar status
+    datetime createdon
+    datetime updatedon
+}
+tcredentialingfact {
+    int credentialingfactid PK
+    int credentialingid FK "FK to tcredentialing.credentialingid"
+    varchar facttypecode FK "FK to tFactTypeReference.facttypecode"
+    int providerfactreferenceid FK "FK to tProviderFactReference.providerfactreferenceid"
+    varchar verificationstatus
+    date validfrom
+    date validto
+    datetime createdon
+}
+tVerificationConfig {
+    varchar facttypecode FK "FK to tFactTypeReference.facttypecode"
+    varchar fieldname
+    bit isverificationrequired
+
+}
+tcredentialingfactverification {
+    int credentialingfactid FK "FK to tcredentialingfact.credentialingfactid"
+    varchar fieldname
+    varchar verificationstatus
+    varchar fieldvalue
+    varchar verifiedvalue
+    datetime verifiedon
+ 
+}
+tcredentialingfactnote {
+    int credentialingfactid FK "FK to tcredentialingfact.credentialingfactid"
+    int noteid PK
+    text note
+    datetime createdon
+}
+
+%% Case Management Domain
+tplmcaseheader {
+    int caseid PK
+    int applicationid FK "FK to tonboarding.applicationid"
+    varchar module
+    varchar priority
+    varchar status
+    date duedate
+    varchar casestatus
+    datetime createdon
+    datetime updatedon
+}
+
+%% Relationships
+%% Onboarding Domain Relationships
+tonboarding ||--|| tpractioner : "has provider"
+tonboarding ||--o{ troster : "has roster entries"
+tonboarding ||--o{ tonboardingcaseheader : "has case headers"
+tplmcaseheader ||--|| tonboarding : "relates to onboarding application"
+
+%% Enrollment Domain Relationships
+tpractioner ||--|| tperson : "belongs to person"
+tperson ||--|| tpersondetail : "has person detail"
+tpractioner ||--|| tproviderenrollment : "has enrollment level"
+tpractioner ||--o{ tplmpractitioneridentifier : "has identifiers"
+tpractioner ||--o{ tpractionereducation : "has education"
+tpractioner ||--o{ tpractionerworkexperience : "has work experience"
+tpractioner ||--o{ tProviderFactReference : "has provider fact references"
+tFactTypeReference ||--o{ tProviderFactReference : "defines fact types"
+tFactTypeReference ||--o{ tFactAttributeReference : "has fact attributes"
+
+%% Credentialing Domain Relationships
+tpractioner ||--o{ tcredentialing : "has credentialing"
+tcredentialing ||--o{ tcredentialingfact : "has credentialing facts"
+tcredentialingfact ||--o{ tcredentialingfactverification : "has fact verifications"
+tcredentialingfact ||--o{ tcredentialingfactnote : "has fact notes"
+tFactTypeReference ||--o{ tcredentialingfact : "uses fact types"
+tVerificationConfig ||--|| tFactTypeReference : "configures verification for fact types"
+
+%% Cross-Domain Relationships
+tonboarding ||--|| tcredentialing : "triggers credentialing"
+tplmcaseheader ||--|| tcredentialing : "manages credentialing cases"
+```
+
+---
+
+## **Table Details**
+
+Below are the detailed descriptions for each table, including columns, data types, descriptions, and example data.
+
+### **Onboarding Domain**
+
+#### **Table: `tonboarding`**
+
+**Description**: Stores provider onboarding application information submitted via self-service portal or roster system.
+
+| Column Name     | Data Type     | Description                                                        | Example Data              |
+|-----------------|---------------|--------------------------------------------------------------------|---------------------------|
+| applicationid   | INT (PK)      | Unique identifier for the onboarding application.                  | 1001                      |
+| providerid      | INT (FK)      | FK to `tpractioner.practitionerid`.                                | 2001                      |
+| applicationtype | VARCHAR(50)   | Type of application (e.g., "SelfServicePortal", "Roster").         | "SelfServicePortal"       |
+| status          | VARCHAR(20)   | Current status of the application (e.g., "Draft", "Submitted").    | "Submitted"               |
+| createdon       | DATETIME      | Timestamp when the application was created.                        | "2023-09-15 10:00:00"     |
+| updatedon       | DATETIME      | Timestamp when the application was last updated.                   | "2023-09-15 12:00:00"     |
+
+---
+
+#### **Table: `troster`**
+
+**Description**: Stores roster submission data associated with onboarding applications.
+
+| Column Name     | Data Type     | Description                                                        | Example Data              |
+|-----------------|---------------|--------------------------------------------------------------------|---------------------------|
+| rosterid        | INT (PK)      | Unique identifier for the roster submission.                       | 3001                      |
+| applicationid   | INT (FK)      | FK to `tonboarding.applicationid`.                                 | 1001                      |
+| rosterdata      | JSON          | Roster data in JSON format.                                        | {"provider": {...}}       |
+| createdon       | DATETIME      | Timestamp when the roster submission was created.                  | "2023-09-15 09:50:00"     |
+
+---
+
+#### **Table: `tonboardingcaseheader`**
+
+**Description**: Manages the onboarding case lifecycle.
+
+| Column Name  | Data Type     | Description                                                        | Example Data              |
+|--------------|---------------|--------------------------------------------------------------------|---------------------------|
+| caseid       | INT (PK)      | Unique identifier for the onboarding case.                         | 4001                      |
+| applicationid| INT (FK)      | FK to `tonboarding.applicationid`.                                 | 1001                      |
+| casestatus   | VARCHAR(50)   | Status of the case (e.g., "Open", "Closed").                       | "Open"                    |
+| priority     | VARCHAR(20)   | Priority level of the case (e.g., "High", "Medium").               | "High"                    |
+| duedate      | DATETIME      | Due date for the case resolution.                                  | "2023-09-20 17:00:00"     |
+| createdon    | DATETIME      | Timestamp when the case was created.                               | "2023-09-15 10:05:00"     |
+| updatedon    | DATETIME      | Timestamp when the case was last updated.                          | "2023-09-15 11:00:00"     |
+
+---
+
+### **Enrollment Domain**
+
+#### **Table: `tperson`**
+
+**Description**: Stores personal information about the provider.
+
+| Column Name     | Data Type     | Description                                                        | Example Data              |
+|-----------------|---------------|--------------------------------------------------------------------|---------------------------|
+| personid        | INT (PK)      | Unique identifier for the person.                                  | 5001                      |
+| dateofbirth     | DATE          | Date of birth of the person.                                       | "1980-01-15"              |
+| dateofdeath     | DATE          | Date of death (if applicable).                                     | NULL                      |
+| gendertypecode  | VARCHAR(10)   | Gender code (e.g., "M", "F", "O").                                 | "M"                       |
+
+---
+
+#### **Table: `tpersondetail`**
+
+**Description**: Stores additional personal details about the provider.
+
+| Column Name                 | Data Type     | Description                                                        | Example Data              |
+|-----------------------------|---------------|--------------------------------------------------------------------|---------------------------|
+| personid                    | INT (FK)      | FK to `tperson.personid`.                                          | 5001                      |
+| maritalstatustypecode       | VARCHAR(10)   | Marital status code (e.g., "S", "M", "D").                         | "M"                       |
+| raceethnicitytypecode       | VARCHAR(10)   | Race/Ethnicity code.                                               | "ASIAN"                   |
+| citizenshipstatustypecode   | VARCHAR(10)   | Citizenship status code (e.g., "Citizen", "Resident").             | "Citizen"                 |
+| handicapped                 | BIT           | Indicates if the person is handicapped (1: Yes, 0: No).            | 0                         |
+| studentstatus               | BIT           | Indicates if the person is a student (1: Yes, 0: No).              | 0                         |
+| validfrom                   | DATE          | Start date of validity.                                            | "2023-01-01"              |
+| validto                     | DATE          | End date of validity.                                              | "2023-12-31"              |
+
+---
+
+#### **Table: `tproviderenrollment`**
+
+**Description**: Stores enrollment level information for providers.
+
+| Column Name               | Data Type     | Description                                                        | Example Data              |
+|---------------------------|---------------|--------------------------------------------------------------------|---------------------------|
+| plmproviderlevelnameid    | INT (PK)      | Unique identifier for the provider enrollment level.               | 6001                      |
+| leveltypecode             | VARCHAR(50)   | Code representing the enrollment level type.                       | "Primary"                 |
+| leveldescription          | VARCHAR(255)  | Description of the enrollment level.                               | "Primary Care Provider"   |
+| leveldisplayname          | VARCHAR(100)  | Display name for the enrollment level.                             | "Primary Care"            |
+
+---
+
+#### **Table: `tpractioner`**
+
+**Description**: Stores the main provider record.
+
+| Column Name                       | Data Type     | Description                                                        | Example Data              |
+|-----------------------------------|---------------|--------------------------------------------------------------------|---------------------------|
+| practitionerid                    | INT (PK)      | Unique identifier for the practitioner.                            | 2001                      |
+| personid                          | INT (FK)      | FK to `tperson.personid`.                                          | 5001                      |
+| providerEnrollmentId              | INT (FK)      | FK to `tproviderenrollment.plmproviderlevelnameid`.                | 6001                      |
+| practitionertypecode              | VARCHAR(50)   | Code representing the practitioner type (e.g., "Doctor").          | "Doctor"                  |
+| npi                               | VARCHAR(20)   | National Provider Identifier.                                      | "1234567890"              |
+| fedid                             | VARCHAR(20)   | Federal ID number.                                                 | "987654321"               |
+| note                              | TEXT          | Additional notes about the practitioner.                           | "Specializes in Cardiology" |
+| credentialstatustypecode          | VARCHAR(50)   | Credentialing status code (e.g., "Pending", "Active").             | "Active"                  |
+| practitionercontractstatustypecode| VARCHAR(50)   | Contract status code.                                              | "Contracted"              |
+| practitioneronboardstatustypecode | VARCHAR(50)   | Onboarding status code.                                            | "Completed"               |
+
+---
+
+#### **Table: `tplmpractitioneridentifier`**
+
+**Description**: Stores additional identifiers for the provider (e.g., licenses).
+
+| Column Name                 | Data Type     | Description                                                        | Example Data              |
+|-----------------------------|---------------|--------------------------------------------------------------------|---------------------------|
+| provideridentifierid        | INT (PK)      | Unique identifier for the provider identifier.                     | 7001                      |
+| practitionerid              | INT (FK)      | FK to `tpractioner.practitionerid`.                                | 2001                      |
+| provideridentifier          | VARCHAR(50)   | Identifier value (e.g., License Number).                           | "A1234567"                |
+| effectivefrom               | DATE          | Start date of the identifier's validity.                           | "2020-01-01"              |
+| terminatedon                | DATE          | Termination date of the identifier (if applicable).                | NULL                      |
+| identifierdescription       | TEXT          | Description of the identifier.                                     | "State Medical License"   |
+| termreason                  | VARCHAR(255)  | Reason for termination (if applicable).                            | NULL                      |
+| registrationstatustypecode  | VARCHAR(50)   | Registration status code.                                          | "Active"                  |
+| issuingauthority            | VARCHAR(50)   | Authority that issued the identifier.                              | "State Medical Board"     |
+| scheduledtypecode           | VARCHAR(50)   | Scheduled type code (e.g., "Full", "Provisional").                 | "Full"                    |
+| incurrentstate              | BIT           | Indicates if identifier is in current state (1: Yes, 0: No).       | 1                         |
+| licensetypecode             | VARCHAR(50)   | License type code.                                                 | "Medical"                 |
+| identifierstatustypecode    | VARCHAR(50)   | Status code of the identifier.                                     | "Active"                  |
+
+---
+
+#### **Table: `tpractionereducation`**
+
+**Description**: Stores the education history of the provider.
+
+| Column Name                      | Data Type     | Description                                                        | Example Data              |
+|----------------------------------|---------------|--------------------------------------------------------------------|---------------------------|
+| educationid                      | INT (PK)      | Unique identifier for the education record.                        | 8001                      |
+| practitionerid                   | INT (FK)      | FK to `tpractioner.practitionerid`.                                | 2001                      |
+| statecode                        | VARCHAR(10)   | State code where education was obtained.                           | "NY"                      |
+| isspecialtyboardqualification    | BIT           | Indicates if it's a specialty board qualification (1: Yes, 0: No). | 1                         |
+| specialtytypecode                | VARCHAR(50)   | Code representing the specialty type.                              | "Cardiology"              |
+| recertificationeligibility       | BIT           | Eligibility for recertification (1: Yes, 0: No).                   | 1                         |
+| country                          | VARCHAR(50)   | Country where education was obtained.                              | "USA"                     |
+| certificatename                  | VARCHAR(100)  | Name of the certificate obtained.                                  | "Board Certified Cardiologist" |
+| certificateissuedate             | DATE          | Date the certificate was issued.                                   | "2018-05-15"              |
+| certificateexpirydate            | DATE          | Date the certificate expires.                                      | "2028-05-15"              |
+
+---
+
+#### **Table: `tpractionerworkexperience`**
+
+**Description**: Stores the work experience of the provider.
+
+| Column Name       | Data Type     | Description                                                        | Example Data              |
+|-------------------|---------------|--------------------------------------------------------------------|---------------------------|
+| experienceid      | INT (PK)      | Unique identifier for the work experience record.                  | 9001                      |
+| practitionerid    | INT (FK)      | FK to `tpractioner.practitionerid`.                                | 2001                      |
+| organizationname  | VARCHAR(100)  | Name of the organization.                                          | "General Hospital"        |
+| designation       | VARCHAR(100)  | Role or designation at the organization.                           | "Attending Physician"     |
+| city              | VARCHAR(100)  | City where the organization is located.                            | "New York"                |
+| startdate         | DATE          | Start date of employment.                                          | "2015-06-01"              |
+| enddate           | DATE          | End date of employment (if applicable).                            | NULL                      |
+
+---
+
+#### **Table: `tFactTypeReference`**
+
+**Description**: Defines the various fact types (e.g., education, work experience, licenses).
+
+| Column Name    | Data Type     | Description                                                        | Example Data              |
+|----------------|---------------|--------------------------------------------------------------------|---------------------------|
+| facttypecode   | VARCHAR(50) PK| Unique code representing the fact type.                            | "Education"               |
+| facttypename   | VARCHAR(100)  | Name of the fact type.                                             | "Education"               |
+| description    | TEXT          | Description of the fact type.                                      | "Educational background"  |
+| status         | VARCHAR(20)   | Status of the fact type (e.g., "Active").                          | "Active"                  |
+| createdon      | DATETIME      | Timestamp when the fact type was created.                          | "2020-01-01 09:00:00"     |
+
+---
+
+#### **Table: `tProviderFactReference`**
+
+**Description**: Links provider records to their specific fact records.
+
+| Column Name            | Data Type     | Description                                                        | Example Data              |
+|------------------------|---------------|--------------------------------------------------------------------|---------------------------|
+| providerfactreferenceid| INT (PK)      | Unique identifier for the provider fact reference.                 | 10001                     |
+| providerid             | INT (FK)      | FK to `tpractioner.practitionerid`.                                | 2001                      |
+| facttypecode           | VARCHAR(50) FK| FK to `tFactTypeReference.facttypecode`.                           | "Education"               |
+| facttablename          | VARCHAR(100)  | Name of the table where the fact is stored.                        | "tpractionereducation"    |
+| factrecordid           | INT           | ID of the specific fact record.                                    | 8001                      |
+| status                 | VARCHAR(20)   | Status of the fact reference (e.g., "Active").                     | "Active"                  |
+| createdon              | DATETIME      | Timestamp when the fact reference was created.                     | "2023-09-15 10:30:00"     |
+
+---
+
+#### **Table: `tFactAttributeReference`**
+
+**Description**: Defines which attributes of a fact type are mandatory during enrollment.
+
+| Column Name   | Data Type     | Description                                                        | Example Data              |
+|---------------|---------------|--------------------------------------------------------------------|---------------------------|
+| facttypecode  | VARCHAR(50) FK| FK to `tFactTypeReference.facttypecode`.                           | "Education"               |
+| fieldname     | VARCHAR(100)  | Name of the attribute/field.                                       | "degree"                  |
+| ismandatory   | BIT           | Indicates if the field is mandatory (1: Yes, 0: No).               | 1                         |
+| createdon     | DATETIME      | Timestamp when the attribute reference was created.                | "2023-01-01 09:00:00"     |
+
+---
+
+### **Credentialing Domain**
+
+#### **Table: `tcredentialing`**
+
+**Description**: Manages the credentialing lifecycle for a provider.
+
+| Column Name          | Data Type     | Description                                                        | Example Data              |
+|----------------------|---------------|--------------------------------------------------------------------|---------------------------|
+| credentialingid      | INT (PK)      | Unique identifier for the credentialing process.                   | 11001                     |
+| providerid           | INT (FK)      | FK to `tpractioner.practitionerid`.                                | 2001                      |
+| credentialingtype    | VARCHAR(50)   | Type of credentialing (e.g., "Initial").                           | "Initial"                 |
+| status               | VARCHAR(20)   | Status of the credentialing process (e.g., "Pending").             | "Pending"                 |
+| createdon            | DATETIME      | Timestamp when the credentialing process started.                  | "2023-09-16 09:00:00"     |
+| updatedon            | DATETIME      | Timestamp when the credentialing process was last updated.         | "2023-09-17 11:00:00"     |
+
+---
+
+#### **Table: `tcredentialingfact`**
+
+**Description**: References fact data from Enrollment and tracks verification status.
+
+| Column Name               | Data Type     | Description                                                        | Example Data              |
+|---------------------------|---------------|--------------------------------------------------------------------|---------------------------|
+| credentialingfactid       | INT (PK)      | Unique identifier for the credentialing fact.                      | 12001                     |
+| credentialingid           | INT (FK)      | FK to `tcredentialing.credentialingid`.                            | 11001                     |
+| facttypecode              | VARCHAR(50) FK| FK to `tFactTypeReference.facttypecode`.                           | "Education"               |
+| providerfactreferenceid   | INT (FK)      | FK to `tProviderFactReference.providerfactreferenceid`.            | 10001                     |
+| verificationstatus        | VARCHAR(20)   | Verification status (e.g., "Pending").                             | "Pending"                 |
+| validfrom                 | DATE          | Start date of fact validity.                                       | "2023-09-15"              |
+| validto                   | DATE          | End date of fact validity.                                         | "2024-09-15"              |
+| createdon                 | DATETIME      | Timestamp when the credentialing fact was created.                 | "2023-09-16 09:15:00"     |
+
+---
+
+#### **Table: `tVerificationConfig`**
+
+**Description**: Defines which attributes of each fact type require verification.
+
+| Column Name            | Data Type     | Description                                                        | Example Data              |
+|------------------------|---------------|--------------------------------------------------------------------|---------------------------|
+| facttypecode           | VARCHAR(50) FK| FK to `tFactTypeReference.facttypecode`.                           | "Education"               |
+| fieldname              | VARCHAR(100)  | Name of the field requiring verification.                          | "degree"                  |
+| isverificationrequired | BIT           | Indicates if verification is required (1: Yes, 0: No).             | 1                         |
+
+---
+
+#### **Table: `tcredentialingfactverification`**
+
+**Description**: Tracks verification results at the attribute level.
+
+| Column Name           | Data Type     | Description                                                        | Example Data              |
+|-----------------------|---------------|--------------------------------------------------------------------|---------------------------|
+| credentialingfactid   | INT (FK)      | FK to `tcredentialingfact.credentialingfactid`.                    | 12001                     |
+| fieldname             | VARCHAR(100)  | Name of the field being verified.                                  | "degree"                  |
+| verificationstatus    | VARCHAR(20)   | Verification status (e.g., "Pending", "Verified").                 | "Pending"                 |
+| fieldvalue            | VARCHAR(100)  | Value submitted by the provider.                                   | "MD"                      |
+| verifiedvalue         | VARCHAR(100)  | Value verified externally (if any).                                | NULL                      |
+| verifiedon            | DATETIME      | Timestamp when the field was verified.                             | NULL                      |
+
+---
+
+#### **Table: `tcredentialingfactnote`**
+
+**Description**: Stores notes related to the credentialing fact.
+
+| Column Name           | Data Type     | Description                                                        | Example Data              |
+|-----------------------|---------------|--------------------------------------------------------------------|---------------------------|
+| credentialingfactid   | INT (FK)      | FK to `tcredentialingfact.credentialingfactid`.                    | 12001                     |
+| noteid                | INT (PK)      | Unique identifier for the note.                                    | 13001                     |
+| note                  | TEXT          | Content of the note.                                               | "Verification pending with university." |
+| createdon             | DATETIME      | Timestamp when the note was created.                               | "2023-09-16 10:00:00"     |
+
+---
+
+### **Case Management Domain**
+
+#### **Table: `tplmcaseheader`**
+
+**Description**: Manages cases across domains, including onboarding and credentialing.
+
+| Column Name   | Data Type     | Description                                                        | Example Data              |
+|---------------|---------------|--------------------------------------------------------------------|---------------------------|
+| caseid        | INT (PK)      | Unique identifier for the case.                                    | 4001                      |
+| applicationid | INT (FK)      | FK to `tonboarding.applicationid`.                                 | 1001                      |
+| module        | VARCHAR(50)   | Module associated with the case (e.g., "Onboarding").              | "Onboarding"              |
+| priority      | VARCHAR(20)   | Priority level of the case.                                        | "High"                    |
+| status        | VARCHAR(20)   | Status of the case (e.g., "Open", "Closed").                       | "Open"                    |
+| duedate       | DATE          | Due date for the case.                                             | "2023-09-20"              |
+| casestatus    | VARCHAR(50)   | Detailed status of the case.                                       | "Pending Review"          |
+| createdon     | DATETIME      | Timestamp when the case was created.                               | "2023-09-15 10:05:00"     |
+| updatedon     | DATETIME      | Timestamp when the case was last updated.                          | "2023-09-15 11:00:00"     |
+
+---
+
+This comprehensive overview includes all tables, their relationships, and detailed information about each column, fulfilling your request to recheck the ER diagram and provide detailed table descriptions with example data.
